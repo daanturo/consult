@@ -273,6 +273,8 @@ The dynamically computed arguments are appended.
 Can be either a string, or a list of strings or expressions."
   :type '(choice string (repeat (choice string expression))))
 
+(defvar-local consult-initial-grep-args nil)
+
 (defcustom consult-find-args
   "find . -not ( -wholename */.* -prune )"
   "Command line arguments for find, see `consult-find'.
@@ -4617,6 +4619,7 @@ INITIAL is inital input."
   (let* ((cmd (consult--build-args consult-grep-args))
          (type (if (consult--grep-lookahead-p (car cmd) "-P") 'pcre 'extended)))
     (lambda (input)
+      (unless consult-initial-grep-args (setq consult-initial-grep-args consult-grep-args))
       (pcase-let* ((`(,arg . ,opts) (consult--command-split input))
                    (flags (append cmd opts))
                    (ignore-case (or (member "-i" flags) (member "--ignore-case" flags))))
@@ -4682,6 +4685,7 @@ Otherwise the `default-directory' is searched."
                (`(,arg . ,opts) (consult--command-split input))
                (flags (append cmd opts))
                (ignore-case (or (member "-i" flags) (member "--ignore-case" flags))))
+    (unless consult-initial-grep-args (setq consult-initial-grep-args consult-git-grep-args))
     (if (or (member "-F" flags) (member "--fixed-strings" flags))
         `(:command (,@cmd "-e" ,arg ,@opts) :highlight
                    ,(apply-partially #'consult--highlight-regexps
@@ -4707,6 +4711,7 @@ for more details."
   (let* ((cmd (consult--build-args consult-ripgrep-args))
          (type (if (consult--grep-lookahead-p (car cmd) "-P") 'pcre 'extended)))
     (lambda (input)
+      (unless consult-initial-grep-args (setq consult-initial-grep-args consult-ripgrep-args))
       (pcase-let* ((`(,arg . ,opts) (consult--command-split input))
                    (flags (append cmd opts))
                    (ignore-case (if (or (member "-S" flags) (member "--smart-case" flags))
