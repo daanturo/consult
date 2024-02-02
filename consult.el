@@ -4430,9 +4430,11 @@ MODE can be a mode or a list of modes to restrict the returned buffers.
 PREDICATE is a predicate function.
 AS is a conversion function."
   (let ((root (consult--normalize-directory directory))
+        (last-buf (other-buffer))
         (buffers (buffer-list)))
     (when sort
       (setq buffers (funcall (intern (format "consult--buffer-sort-%s" sort)) buffers)))
+    (setq buffers (cons last-buf (delete last-buf buffers)))
     (when (or filter mode as root)
       (let ((exclude-re (consult--regexp-filter exclude))
             (include-re (consult--regexp-filter include))
